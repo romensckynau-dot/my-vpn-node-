@@ -1,0 +1,29 @@
+name: Generate VPN Config
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up WireGuard Generator
+        run: |
+          sudo apt-get update && sudo apt-get install -y wireguard
+          SERVER_PRIVKEY=$(wg genkey)
+          SERVER_PUBKEY=$(echo "$SERVER_PRIVKEY" | wg pubkey)
+          CLIENT_PRIVKEY=$(wg genkey)
+          CLIENT_PUBKEY=$(echo "$CLIENT_PRIVKEY" | wg pubkey)
+          
+          echo "============================="
+          echo "--- CLIENT CONFIG START ---"
+          echo "[Interface]"
+          echo "PrivateKey = $CLIENT_PRIVKEY"
+          echo "Address = 10.0.0.2/32"
+          echo ""
+          echo "[Peer]"
+          echo "PublicKey = $SERVER_PUBKEY"
+          echo "Endpoint = 127.0.0.1:51820"
+          echo "AllowedIPs = 0.0.0.0/0"
+          echo "--- CLIENT CONFIG END ---"
+          echo "============================="
